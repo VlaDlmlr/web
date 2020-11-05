@@ -1,0 +1,52 @@
+package com.example.valutparsing;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.os.Bundle;
+import android.util.Log;
+
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
+import java.io.IOException;
+
+public class MainActivity extends AppCompatActivity {
+    private Document doc; //хранение всей страници сайта
+    private Thread secThread;
+    private Runnable runnable; //место запуска кода
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {//onCreate создания приложений
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        init();//запуск проложения после его создания в onCreate
+
+    }
+    private void init(){//в нутри этой функции запустим наш второстипенный поток
+        runnable = new Runnable() {
+            @Override
+            public void run() {//здеть и будет запускатся наш getWeb
+                getWeb();
+            }
+        };
+
+        secThread = new Thread(runnable);//runnable запускаем на второстипенном потоке
+        secThread.start();//нипосредственно запуск потока
+    }
+
+    private void getWeb(){
+        try {
+            doc = Jsoup.connect("http://isu.ru/ru/news/archive.html").get();//помещяем сайт в doc
+            Elements tables = doc.getElementsByClass("second_news");   //Массив элементов
+            Element our_table = tables.get(0);
+
+            Log.d("MyLog","Second news : " + our_table.get(0).text());//как только получим нашу страницу сразу запустим лог MyLog
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+}
